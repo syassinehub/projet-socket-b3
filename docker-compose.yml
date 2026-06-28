@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # --- 1. FRONT-END (Dashboard Web) ---
+  web:
+    build: ./frontend
+    container_name: socket-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    networks:
+      - socket_network
+
+  # --- 2. BACK-END (API Python) ---
+  api:
+    build: ./backend
+    container_name: socket-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db-sql
+      - db-nosql
+    networks:
+      - socket_network
+
+  # --- 3. BASE DE DONNÉES SQL (PostgreSQL) ---
+  db-sql:
+    image: postgres:15
+    container_name: socket-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: StrongPassword123!
+      POSTGRES_DB: socket_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - socket_network
+
+  # --- 4. BASE DE DONNÉES NOSQL (Elasticsearch) ---
+  db-nosql:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: socket-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=StrongElasticPass123!
+      - xpack.security.enabled=true
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - socket_network
+
+# Création d'un réseau privé pour isoler nos conteneurs (Hardening)
+networks:
+  socket_network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  esdata:

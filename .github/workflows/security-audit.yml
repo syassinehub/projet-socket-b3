@@ -1,0 +1,26 @@
+name: Security Audit CI/CD
+
+# L'analyse de sécurité se déclenchera à chaque envoi de code sur dev ou main
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+jobs:
+  trivy-security-scan:
+    name: Analyse de vulnérabilités (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code source
+        uses: actions/checkout@v3
+
+      - name: Lancement du scanner Trivy sur le projet
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          # On ne bloque pas le déploiement en dev si une faille est trouvée
+          exit-code: '0'
