@@ -1,6 +1,6 @@
 # Scenario de demonstration - Soutenance SOCket
 
-Ce scenario permet de presenter le projet de bout en bout en 8 a 12 minutes.
+Ce scenario permet de presenter le projet de bout en bout pour l oral final: environ 25 minutes de presentation, puis 5 minutes de questions.
 
 ## 1. Introduire le besoin
 
@@ -31,6 +31,7 @@ Expliquer les services:
 - `socket-backend`: API;
 - `socket-postgres`: SQL;
 - `socket-elasticsearch`: NoSQL/logs.
+- `socket-suricata`: IDS optionnel pour la capture live.
 
 ## 3. Se connecter au SOC
 
@@ -82,6 +83,7 @@ Lancer:
 
 ```bash
 bash pentest/simulate_attack.sh
+bash pentest/attack_web_vectors.sh
 ```
 
 Ce script genere des requetes suspectes:
@@ -92,7 +94,9 @@ Ce script genere des requetes suspectes:
 - enumeration de chemins admin;
 - tentative d acces a fichiers sensibles;
 - directory traversal;
-- flood/reconnaissance HTTP.
+- command injection;
+- SSRF;
+- reconnaissance HTTP.
 
 Revenir dans l interface et attendre quelques secondes. Le tableau des incidents se met a jour automatiquement grace au rafraichissement temps reel.
 
@@ -152,21 +156,8 @@ Dans l interface:
 
 Verification possible en terminal:
 
-Verifier les evenements:
-
-```bash
-curl -s http://localhost/api/v1/logs/recent
-```
-
-Voir les index:
-
 ```bash
 docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! http://localhost:9200/_cat/indices?v
-```
-
-Voir les documents:
-
-```bash
 docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! "http://localhost:9200/socket-events/_search?pretty&size=5"
 ```
 

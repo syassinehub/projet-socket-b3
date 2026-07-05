@@ -120,21 +120,19 @@ Resultat attendu:
 
 ## 8. Test Elasticsearch
 
-```bash
-curl -s http://localhost/api/v1/logs/recent
-```
+Depuis l interface, se connecter en `admin`, ouvrir `Donnees`, puis l onglet `Elasticsearch`.
 
-Resultat attendu:
-
-- reponse JSON;
-- evenements de type `auth.success`, `incident.created` ou `incident.updated` selon les actions effectuees.
-
-Verification directe dans Elasticsearch:
+Verification directe en terminal:
 
 ```bash
 docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! http://localhost:9200/_cat/indices?v
 docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! "http://localhost:9200/socket-events/_search?pretty&size=5"
 ```
+
+Resultat attendu:
+
+- index `socket-events` present;
+- evenements de type `auth.success`, `incident.created` ou `incident.updated` selon les actions effectuees.
 
 ## 9. Test PRA
 
@@ -180,3 +178,13 @@ Resultat attendu:
 - Le PRA cree une sauvegarde.
 - La documentation est presente dans `docs/`.
 - Le code est pousse sur Git sans `.env`.
+
+## 12. Captures conseillees
+
+- `docker compose ps` avec les services actifs.
+- Page de connexion et dashboard SOCket.
+- Detail d un incident avec preuves, score et recommandation.
+- Vue `Donnees` avec PostgreSQL et Elasticsearch.
+- Sortie d un script de pentest.
+- Sauvegarde PRA avec fichier SQL et empreinte SHA256.
+- Trello ou outil de suivi de projet.

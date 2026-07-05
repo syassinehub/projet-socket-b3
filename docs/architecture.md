@@ -2,7 +2,7 @@
 
 ## Vue d ensemble
 
-SOCket est compose de cinq services Docker principaux, avec un service Suricata optionnel pour la detection IDS:
+SOCket est compose de cinq services Docker principaux, avec un service Suricata optionnel pour la detection IDS live:
 
 - `socket-nginx`: point d entree public sur `http://localhost`.
 - `socket-frontend`: interface Vue.js compilee et servie par Nginx.
@@ -22,7 +22,7 @@ flowchart LR
     Suricata --> Eve["infra/suricata/logs/eve.json"]
     Eve --> Sensor["ingest_suricata_eve.py"]
     Sensor --> Api
-    Pentest["Scripts pentest\nSQLi, bruteforce, scan"] --> Proxy
+    Pentest["Scripts pentest\nSQLi, XSS, bruteforce, SSRF"] --> Proxy
 ```
 
 ## Flux utilisateur
@@ -37,8 +37,8 @@ flowchart LR
 ## Flux detection IDS
 
 1. Les scripts dans `pentest/` envoient des requetes suspectes vers Nginx.
-2. Suricata inspecte le trafic du reverse proxy et applique les regles IDS locales.
-3. Suricata ecrit ses alertes au format EVE JSON dans `infra/suricata/logs/eve.json`.
+2. En mode live, Suricata inspecte le trafic du reverse proxy et applique les regles IDS locales.
+3. Suricata ecrit ses alertes au format EVE JSON dans `infra/suricata/logs/eve.json`. Pour une demonstration reproductible, `infra/suricata/sample_eve.json` fournit le meme format EVE JSON.
 4. `infra/scripts/ingest_suricata_eve.py` lit les alertes EVE et les envoie a `/api/v1/ingest/suricata-eve` avec `X-SOCket-Sensor-Token`.
 5. FastAPI transforme les alertes Suricata en incidents SOCket avec score, severite, confiance et preuves.
 6. FastAPI cree les incidents dans PostgreSQL.

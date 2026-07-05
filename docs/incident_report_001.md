@@ -1,9 +1,9 @@
 # Rapport d incident de securite - SOCket
 
 **ID:** INC-IDS-DEMO-001  
-**Date:** 2026-07-01  
+**Date:** 2026-07-05  
 **Statut:** Mitige  
-**Severite:** Haute a critique selon le score IDS
+**Severite:** Variable selon le score SOCket
 
 ## Resume executif
 
@@ -13,7 +13,10 @@ Impact estime:
 
 - exposition potentielle de chemins sensibles;
 - tentative d injection SQL;
+- tentative XSS;
 - tentative de bruteforce;
+- tentative de command injection;
+- tentative SSRF;
 - reconnaissance de surface d administration;
 - bruit reseau anormal lie a la reconnaissance.
 
@@ -24,8 +27,11 @@ Exemples de vecteurs analyses:
 - Recherche de fichiers sensibles: `/.env`, `/config.php`, `/backup.zip`.
 - Reconnaissance de surfaces admin: `/admin`, `/wp-admin`, `/phpmyadmin`.
 - Injection SQL: payload `UNION SELECT` et condition `OR 1=1`.
+- XSS: payload `<script>alert(1)</script>`.
 - Bruteforce: echecs repetes sur `/api/v1/auth/login`.
 - Traversal: tentative d acces a `/../../etc/passwd`.
+- Command injection: tentative via parametre `cmd=whoami`.
+- SSRF: tentative d acces a `169.254.169.254`.
 
 ## Qualification SOC
 
@@ -62,14 +68,14 @@ LIMIT 5;
 Dans Elasticsearch:
 
 ```bash
-curl -s http://localhost/api/v1/logs/recent
+docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! "http://localhost:9200/socket-events/_search?pretty&size=5"
 ```
 
 ## Reponse et mitigation
 
 - Nginx applique des en-tetes de securite et du rate limiting.
 - Les chemins sensibles retournent 404.
-- Les detections creent automatiquement des incidents dans SOCket.
+- Les alertes Suricata creent automatiquement des incidents dans SOCket.
 - Les actions analystes sont tracees dans la chronologie incident.
 - Les evenements applicatifs sont journalises dans Elasticsearch.
 
@@ -85,7 +91,7 @@ curl -s http://localhost/api/v1/logs/recent
 
 ## Ameliorations futures
 
-- Ajouter Wazuh ou des playbooks SOC pour completer le traitement.
+- Ajouter Wazuh pour enrichir la detection et la supervision.
 - Ajouter HTTPS avec certificats.
 - Ajouter une politique de verrouillage de compte apres trop d echecs.
 - Ajouter des playbooks de reponse par type d attaque.

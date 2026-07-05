@@ -81,12 +81,6 @@ Cette vue est reservee au role `admin`. L interface affiche les derniers documen
 
 ### Terminal
 
-Via l API SOCket:
-
-```bash
-curl -s http://localhost/api/v1/logs/recent
-```
-
 Voir les index:
 
 ```bash
@@ -98,6 +92,8 @@ Voir les derniers documents:
 ```bash
 docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! "http://localhost:9200/socket-events/_search?pretty&size=5"
 ```
+
+L endpoint SOCket `/api/v1/logs/recent` existe aussi, mais il est reserve au role `admin` et doit etre appele avec un jeton d authentification.
 
 Evenements typiques:
 

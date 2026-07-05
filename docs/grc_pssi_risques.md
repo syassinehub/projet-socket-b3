@@ -34,7 +34,7 @@ Cette documentation presente les choix de gouvernance et de securite appliques a
 | Risque | Gravite | Vraisemblance | Mesures appliquees |
 | --- | --- | --- | --- |
 | Compromission compte analyste | Critique | Moyenne | Authentification, roles, logs, rotation possible du secret JWT |
-| Injection ou attaque web | Elevee | Moyenne | FastAPI/Pydantic, reverse proxy, rate limiting, IDS sur logs |
+| Injection ou attaque web | Elevee | Moyenne | FastAPI/Pydantic, reverse proxy, rate limiting, alertes Suricata EVE |
 | Exposition de secrets | Critique | Moyenne | `.env` ignore, blocage Nginx des chemins sensibles |
 | Perte donnees incidents | Critique | Faible | Volume PostgreSQL persistant, script PRA, hash de sauvegarde |
 | Indisponibilite plateforme SOC | Elevee | Faible | Conteneurisation, redemarrage automatique, services segmentes |

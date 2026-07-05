@@ -90,24 +90,29 @@ SOCket calcule ensuite un score SOC a partir de la severite Suricata, du type d 
 - Sauvegarde PRA via `infra/scripts/backup_pra.sh`.
 - CI GitHub Actions avec build frontend, verification Python et scan Trivy.
 
+## Couverture de l enonce
+
+| Livrable demande | Element fourni |
+| --- | --- |
+| Documentation fonctionnelle et technique | Dossier `docs/`, README, specifications, architecture, GRC, PRA et tests |
+| Depot Git | Code applicatif, infrastructure Docker, scripts, documentation et CI versionnes |
+| Plateforme SOC fonctionnelle et deployee | Stack Docker Compose accessible sur `http://localhost` avec frontend, API, PostgreSQL, Elasticsearch, Nginx et ingestion Suricata |
+
 ## Documentation
 
-La documentation finale se trouve dans `docs/`:
+La documentation finale se trouve dans `docs/`. Elle couvre les livrables demandes: documentation fonctionnelle, documentation technique, securite/GRC, tests et aide pour l oral.
 
 | Fichier | Role |
 | --- | --- |
 | `docs/installation.md` | Installation, lancement, acces et depannage |
 | `docs/architecture.md` | Architecture technique et flux de donnees |
 | `docs/specifications.md` | Contexte, besoins et choix techniques |
-| `docs/demo_soutenance.md` | Scenario complet pour la presentation orale |
-| `docs/tests_validation.md` | Tests a executer avant le rendu |
 | `docs/bdd_et_logs.md` | PostgreSQL, Elasticsearch et logs |
 | `docs/grc_pssi_risques.md` | PSSI, risques, mesures de securite |
 | `docs/pra_pca.md` | Sauvegarde, restauration et continuite |
 | `docs/incident_report_001.md` | Exemple de rapport d incident |
-| `docs/evaluation_mapping.md` | Correspondance avec les attentes de l enonce |
-| `docs/checklist_rendu.md` | Checklist finale avant depot/soutenance |
-| `docs/captures_preuves.md` | Captures et preuves conseillees |
+| `docs/tests_validation.md` | Tests, validation et captures a preparer |
+| `docs/demo_soutenance.md` | Scenario complet pour la presentation orale |
 
 ## Commandes utiles
 
@@ -126,7 +131,6 @@ docker exec -it socket-postgres psql -U admin -d socket_db
 Voir les logs Elasticsearch:
 
 ```bash
-curl -s http://localhost/api/v1/logs/recent
 docker exec socket-elasticsearch curl -s -u elastic:StrongElasticPass123! http://localhost:9200/_cat/indices?v
 ```
 

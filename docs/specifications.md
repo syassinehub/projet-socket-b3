@@ -22,13 +22,13 @@ Le prototype est volontairement oriente demonstration pedagogique. Il montre les
 
 - Authentification des analystes et administrateurs.
 - Tableau de bord centralise des incidents.
-- Creation automatique d incidents par capteur IDS.
+- Creation automatique d incidents depuis les alertes Suricata EVE JSON.
 - Qualification par severite, score, confiance, type d attaque et IP source.
 - Mise a jour du statut: Nouveau, En cours, Resolu, Clos.
 - Assignation d un incident a un analyste.
 - Commentaires et chronologie d investigation.
 - Conservation de preuves techniques issues des alertes Suricata EVE JSON.
-- Consultation des evenements de securite stockes dans Elasticsearch.
+- Consultation admin des evenements de securite stockes dans Elasticsearch.
 
 ## 3. Architecture technique
 
@@ -47,6 +47,7 @@ Voir le schema complet dans `docs/architecture.md`.
 - Secrets sortis du `docker-compose.yml` et charges via `.env`.
 - Token d authentification pour les utilisateurs.
 - Token capteur separe pour l ingestion IDS.
+- Separation des roles `admin` et `analyst`.
 - Rate limiting Nginx sur API et authentification.
 - Blocage des chemins sensibles comme `/.env`, `/.git`, `config.php`.
 - Journalisation dans Elasticsearch pour audit et investigation.
@@ -75,7 +76,7 @@ Elasticsearch stocke les evenements techniques:
 
 ## 6. Detection et classement
 
-Suricata analyse le trafic et produit des alertes au format EVE JSON. SOCket lit ces alertes et les transforme en incidents. Chaque detection contient:
+Suricata analyse le trafic ou fournit un fichier EVE JSON de demonstration. SOCket lit ces alertes et les transforme en incidents. Chaque detection contient:
 
 - un type d attaque;
 - une IP source;
@@ -94,6 +95,8 @@ Le score n est pas recopie directement depuis Suricata. SOCket part de la severi
 - le niveau de precision de la signature.
 
 Exemple: une alerte Suricata `severity=1` sert de base critique, mais SOCket peut renforcer ou reduire le score selon le contexte.
+
+Les types couverts dans la demonstration sont notamment: SQL injection, XSS, directory traversal, bruteforce, exposition de fichiers sensibles, decouverte de surfaces admin, command injection et SSRF.
 
 ## 7. Limites du prototype
 
