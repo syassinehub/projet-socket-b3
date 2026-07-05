@@ -1,75 +1,82 @@
-version: '3.8'
-
 services:
-  # --- REVERSE PROXY SÉCURISÉ ---
   proxy:
     image: nginx:alpine
     container_name: socket-nginx
+    restart: unless-stopped
     ports:
-      - "80:80" # C'est le SEUL port ouvert sur l'extérieur (Hardening)
+      - "80:80"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infra/nginx/logs:/var/log/nginx
     depends_on:
       - web
       - api
     networks:
       - socket_network
 
-  # --- 1. FRONT-END (Dashboard) ---
   web:
     build: ./frontend
     container_name: socket-frontend
-    # Ports retirés : segmentation réseau stricte, invisible de l'extérieur
+    restart: unless-stopped
     depends_on:
       - api
     networks:
       - socket_network
 
-  # --- 2. BACK-END (API Python) ---
   api:
     build: ./backend
     container_name: socket-backend
-    # Ports retirés : segmentation réseau stricte, invisible de l'extérieur
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db-sql
+      ELASTIC_URL: http://db-nosql:9200
     depends_on:
-      - db-sql
-      - db-nosql
+      db-sql:
+        condition: service_healthy
+      db-nosql:
+        condition: service_started
     networks:
       - socket_network
 
-  # --- 3. BASE DE DONNÉES SQL (PostgreSQL) ---
   db-sql:
     image: postgres:15
     container_name: socket-postgres
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: StrongPassword123!
-      POSTGRES_DB: socket_db
+    restart: unless-stopped
+    env_file:
+      - .env
     volumes:
-      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
     networks:
       - socket_network
 
-  # --- 4. BASE DE DONNÉES NOSQL (Elasticsearch) ---
   db-nosql:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
     container_name: socket-elasticsearch
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      - discovery.type=single-node
-      - ELASTIC_PASSWORD=StrongElasticPass123!
-      - xpack.security.enabled=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m # Bridage de la RAM pour éviter le crash (Code 137)
+      discovery.type: single-node
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
     volumes:
       - esdata:/usr/share/elasticsearch/data
     networks:
       - socket_network
 
-# Création d'un réseau privé pour isoler nos conteneurs
 networks:
   socket_network:
     driver: bridge
 
-# Persistance des données pour le PCA/PRA
 volumes:
   pgdata:
   esdata:

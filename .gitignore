@@ -1,0 +1,24 @@
+# Python
+backend/venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment and secrets
+.env
+*.local
+
+# Logs and generated artifacts
+infra/nginx/logs/
+*.log
+infra/backups/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+!frontend/.vscode/extensions.json

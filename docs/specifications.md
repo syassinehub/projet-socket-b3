@@ -1,26 +1,110 @@
-# Spécifications du Projet SOCket
+# Specifications du projet SOCket
 
 ## 1. Contexte
-Dans un paysage de menaces en constante évolution, la gestion des événements de sécurité est souvent éclatée entre plusieurs outils non connectés (emails, tableurs, etc.), ce qui ralentit la résolution des incidents. Le RSSI d'un grand groupe industriel a mandaté notre équipe pour concevoir une plateforme centralisée et moderne permettant de suivre un incident de sa détection à sa résolution.
 
-## 2. Besoins Fonctionnels
-La plateforme (prototype fonctionnel) devra permettre aux analystes (SOC/CSIRT) de :
-- S'authentifier de manière sécurisée (gestion des rôles : Analyste, Administrateur).
-- Visualiser un tableau de bord centralisé regroupant les alertes de sécurité.
-- Créer, lire, mettre à jour et clôturer des tickets d'incidents.
-- Assigner des incidents à des membres spécifiques de l'équipe pour collaborer efficacement.
-- Capitaliser sur les connaissances pour anticiper de futures attaques.
+SOCket repond au theme SOC/CSIRT de l enonce: fournir une plateforme centralisee permettant a une equipe securite de detecter, qualifier, suivre et documenter des incidents.
 
-## 3. Besoins Techniques
-Pour répondre au besoin de "Security by Design" et de durcissement, l'architecture retenue est la suivante :
-- **Front-end :** Application web réactive développée en Vue.js.
-- **Back-end :** API REST développée en Python avec le framework FastAPI.
-- **Base de données relationnelle (SQL) :** PostgreSQL pour la gestion des utilisateurs, rôles (DCL) et tickets.
-- **Base de données orientée documents (NoSQL) :** Elasticsearch pour l'ingestion, le stockage et la recherche rapide dans les logs de sécurité.
-- **Infrastructure & Déploiement :** Conteneurisation complète avec Docker et Docker Compose. Reverse proxy Nginx pour la sécurité des flux.
+Le prototype est volontairement oriente demonstration pedagogique. Il montre les briques attendues dans un projet cyber B3:
 
-## 4. Sécurité attendue
-- Authentification et contrôle d'accès rigoureux.
-- Infrastructure back-end durcie et segmentée.
-- Politique de sauvegarde des bases de données.
-- Intégration d'outils d'analyse dans un pipeline CI/CD.
+- application web;
+- API securisee;
+- base SQL;
+- base NoSQL;
+- journalisation;
+- detection d attaques;
+- gestion d incidents;
+- hardening;
+- audit/pentest;
+- PCA/PRA;
+- documentation.
+
+## 2. Besoins fonctionnels couverts
+
+- Authentification des analystes et administrateurs.
+- Tableau de bord centralise des incidents.
+- Creation automatique d incidents par capteur IDS.
+- Qualification par severite, score, confiance, type d attaque et IP source.
+- Mise a jour du statut: Nouveau, En cours, Resolu, Clos.
+- Assignation d un incident a un analyste.
+- Commentaires et chronologie d investigation.
+- Conservation de preuves techniques issues des logs Nginx.
+- Consultation des evenements de securite stockes dans Elasticsearch.
+
+## 3. Architecture technique
+
+- Frontend: Vue.js compile en build statique.
+- Backend: FastAPI expose une API REST securisee.
+- SQL: PostgreSQL stocke utilisateurs, roles, incidents et evenements.
+- NoSQL: Elasticsearch stocke les journaux de securite et evenements applicatifs.
+- Reverse proxy: Nginx centralise l exposition publique et applique les en-tetes de securite.
+- IDS: moteur de detection SOCket analysant les logs Nginx avec classification et scoring.
+- DevOps: Docker Compose et GitHub Actions.
+
+Voir le schema complet dans `docs/architecture.md`.
+
+## 4. Security by design
+
+- Secrets sortis du `docker-compose.yml` et charges via `.env`.
+- Token d authentification pour les utilisateurs.
+- Token capteur separe pour l ingestion IDS.
+- Rate limiting Nginx sur API et authentification.
+- Blocage des chemins sensibles comme `/.env`, `/.git`, `config.php`.
+- Journalisation dans Elasticsearch pour audit et investigation.
+
+## 5. Donnees gerees
+
+### SQL
+
+PostgreSQL stocke les donnees metier:
+
+- comptes utilisateurs;
+- roles;
+- incidents;
+- statut et assignation;
+- chronologie d investigation.
+
+### NoSQL
+
+Elasticsearch stocke les evenements techniques:
+
+- connexions;
+- creations d incidents;
+- modifications;
+- evenements IDS;
+- traces utiles a l audit.
+
+## 6. Detection et classement
+
+Le moteur IDS analyse les logs Nginx et recherche des patterns d attaque. Chaque detection contient:
+
+- un type d attaque;
+- une IP source;
+- un score de dangerosite;
+- une severite;
+- un niveau de confiance;
+- une preuve;
+- une recommandation.
+
+Regle de severite:
+
+- `Critical`: score >= 85;
+- `High`: score >= 70;
+- `Medium`: score >= 45;
+- `Low`: score inferieur a 45.
+
+## 7. Limites du prototype
+
+- Pas de HTTPS en local.
+- Pas de Suricata integre.
+- RBAC simple.
+- Elasticsearch sans interface Kibana.
+- Le moteur IDS est pedagogique et base sur des regles internes.
+
+## 8. Evolutions possibles
+
+- Ajouter Suricata ou Wazuh.
+- Ajouter Kibana.
+- Ajouter HTTPS.
+- Ajouter verrouillage de compte apres echecs repetes.
+- Ajouter des playbooks par type d attaque.
+- Ajouter un RBAC plus granulaire.

@@ -1,18 +1,18 @@
-# Utilisation d'une image Python légère et sécurisée
 FROM python:3.11-slim
 
-# Définition du répertoire de travail dans le conteneur
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Copie des dépendances et installation
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Copie du reste du code de l'API
 COPY . .
 
-# Exposition du port de l'API
-EXPOSE 8000
+RUN addgroup --system socket && adduser --system --ingroup socket socket
+USER socket
 
-# Commande pour lancer le serveur
+EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
