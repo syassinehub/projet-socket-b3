@@ -49,10 +49,11 @@ Le PRA s appuie sur `infra/scripts/backup_pra.sh`, qui exporte PostgreSQL et gen
 Les scripts dans `pentest/` simulent des attaques controlees:
 
 - `simulate_attack.sh`: scenario multi-vecteurs;
+- `attack_web_vectors.sh`: XSS, traversal, fichiers sensibles, admin discovery, command injection et SSRF;
 - `attack_sqli.sh`: injection SQL;
 - `attack_bruteforce.sh`: bruteforce de connexion.
 
-Ces scripts permettent de produire des logs, de tester l IDS et de generer des incidents exploitables dans le SOC.
+Ces scripts permettent de declencher des alertes Suricata EVE JSON et de generer des incidents exploitables dans le SOC.
 
 ## 7. Limites securite connues
 
@@ -60,6 +61,6 @@ Ces scripts permettent de produire des logs, de tester l IDS et de generer des i
 - Pas de politique de verrouillage de compte.
 - Pas d authentification MFA.
 - Pas de segmentation reseau avancee hors Docker.
-- IDS interne plus simple qu un outil industriel.
+- Capture Suricata live dependante des privileges reseau Docker/WSL.
 
 Ces limites sont assumees pour un prototype local et sont listees comme ameliorations futures.

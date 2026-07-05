@@ -5,7 +5,7 @@
 - Debian ou WSL Debian.
 - Docker et Docker Compose.
 - Git.
-- Python 3 pour lancer le capteur IDS local.
+- Python 3 pour lancer le script d ingestion Suricata EVE.
 
 Verifier Docker:
 

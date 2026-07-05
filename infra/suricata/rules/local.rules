@@ -1,0 +1,8 @@
+alert http any any -> any any (msg:"SOCket SQL Injection Attempt"; flow:established,to_server; http.uri; content:"UNION"; nocase; content:"SELECT"; nocase; classtype:web-application-attack; priority:1; sid:1000001; rev:1;)
+alert http any any -> any any (msg:"SOCket XSS Attempt"; flow:established,to_server; http.uri; content:"<script"; nocase; classtype:web-application-attack; priority:2; sid:1000002; rev:1;)
+alert http any any -> any any (msg:"SOCket Directory Traversal Attempt"; flow:established,to_server; http.uri; content:"../"; classtype:web-application-attack; priority:1; sid:1000003; rev:1;)
+alert http any any -> any any (msg:"SOCket Auth Bruteforce Suspected"; flow:established,to_server; http.uri; content:"/api/v1/auth/login"; threshold:type threshold, track by_src, count 5, seconds 60; classtype:attempted-admin; priority:2; sid:1000004; rev:1;)
+alert http any any -> any any (msg:"SOCket Sensitive File Exposure Attempt"; flow:established,to_server; http.uri; content:".env"; nocase; classtype:attempted-recon; priority:3; sid:1000005; rev:1;)
+alert http any any -> any any (msg:"SOCket Admin Surface Discovery"; flow:established,to_server; http.uri; content:"/phpmyadmin"; nocase; classtype:web-application-activity; priority:4; sid:1000006; rev:1;)
+alert http any any -> any any (msg:"SOCket Command Injection Attempt"; flow:established,to_server; http.uri; content:"whoami"; nocase; classtype:web-application-attack; priority:1; sid:1000007; rev:1;)
+alert http any any -> any any (msg:"SOCket SSRF Attempt"; flow:established,to_server; http.uri; content:"169.254.169.254"; nocase; classtype:web-application-attack; priority:2; sid:1000008; rev:1;)

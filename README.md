@@ -9,7 +9,7 @@ Le projet couvre:
 - une base SQL PostgreSQL;
 - une base NoSQL Elasticsearch;
 - un reverse proxy Nginx durci;
-- un moteur IDS interne base sur l analyse de logs;
+- un IDS Suricata avec ingestion EVE JSON;
 - des scripts de simulation d attaques;
 - une procedure PCA/PRA;
 - une documentation de soutenance.
@@ -44,23 +44,40 @@ Le endpoint `/api/v1/incidents` doit repondre `401 Unauthorized` sans token. C e
 
 ## Detection IDS et simulations
 
-Les scripts dans `pentest/` generent de vrais logs HTTP via Nginx. Le script `infra/scripts/run_ids_scan.py` lit les logs, classe les attaques, calcule un score de dangerosite et cree automatiquement des incidents dans SOCket.
+Suricata joue le role de moteur IDS. Il produit des alertes au format EVE JSON, puis SOCket les ingere avec `infra/scripts/ingest_suricata_eve.py`, classe les alertes, calcule un score de dangerosite et cree automatiquement des incidents.
 
 ```bash
 bash pentest/simulate_attack.sh
+bash pentest/attack_web_vectors.sh
 bash pentest/attack_sqli.sh
 bash pentest/attack_bruteforce.sh
 ```
 
-Le moteur IDS detecte notamment:
+Activer Suricata en mode Docker optionnel:
+
+```bash
+docker compose --profile suricata up -d ids-suricata
+```
+
+Ingerer un fichier EVE de demonstration fiable:
+
+```bash
+python3 infra/scripts/ingest_suricata_eve.py --sample
+```
+
+Les alertes Suricata couvrent notamment:
 
 - SQL injection;
 - XSS;
 - directory traversal;
+- command injection;
+- SSRF;
 - exposition de fichiers sensibles;
-- enumeration d interfaces admin;
+- decouverte de surfaces admin;
 - bruteforce d authentification;
-- flood/reconnaissance HTTP.
+- reconnaissance HTTP.
+
+SOCket calcule ensuite un score SOC a partir de la severite Suricata, du type d attaque, du statut HTTP, de la cible visee et des preuves disponibles.
 
 ## Briques principales
 
@@ -69,6 +86,7 @@ Le moteur IDS detecte notamment:
 - PostgreSQL pour les utilisateurs, incidents et chronologie.
 - Elasticsearch pour les journaux de securite.
 - Nginx reverse proxy avec en-tetes de securite, rate limiting et blocage de chemins sensibles.
+- Suricata pour la detection IDS et le format EVE JSON.
 - Sauvegarde PRA via `infra/scripts/backup_pra.sh`.
 - CI GitHub Actions avec build frontend, verification Python et scan Trivy.
 
@@ -127,6 +145,6 @@ docker compose down
 ## Limites et evolutions
 
 - HTTPS n est pas active dans ce prototype local.
-- Le moteur IDS est interne, pas base sur Suricata.
+- La capture Suricata live dans Docker/WSL peut dependre des privileges reseau; un fichier EVE de demonstration est fourni pour une soutenance fiable.
 - Le RBAC peut etre enrichi avec des permissions plus fines.
-- Kibana, Wazuh ou Suricata peuvent etre ajoutes comme evolution.
+- Kibana ou Wazuh peuvent etre ajoutes comme evolution.

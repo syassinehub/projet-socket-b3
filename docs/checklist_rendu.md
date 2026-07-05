@@ -46,14 +46,14 @@ bash infra/scripts/backup_pra.sh
 ## Points a dire a l oral
 
 - SOCket est une plateforme SOC/CSIRT.
-- Les attaques simulees produisent de vrais logs Nginx.
-- Le capteur IDS transforme ces logs en incidents.
+- Les attaques simulees declenchent des alertes Suricata EVE JSON.
+- SOCket transforme ces alertes en incidents.
 - Les incidents sont classes par type, score, severite et confiance.
 - PostgreSQL stocke les donnees metier.
 - Elasticsearch stocke les evenements techniques.
 - Nginx applique du hardening.
 - Le PRA permet de sauvegarder la base SQL.
-- Suricata n est pas utilise dans ce prototype, mais peut etre ajoute comme evolution.
+- Suricata est le moteur IDS presente pour la detection.
 
 ## Points a ne pas oublier
 

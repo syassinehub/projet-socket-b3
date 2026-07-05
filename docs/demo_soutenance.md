@@ -102,18 +102,17 @@ Montrer les nouveaux incidents.
 
 Phrase possible:
 
-> Le capteur lit les logs Nginx, les envoie a l API, puis le moteur IDS interne analyse les patterns d attaque. Chaque alerte recoit un type, un score de dangerosite, une severite, un niveau de confiance et des preuves.
+> Suricata joue le role d IDS. Il analyse le trafic du reverse proxy et produit des alertes au format EVE JSON. SOCket lit ces alertes, les transforme en incidents, puis ajoute un type d attaque, une severite, un score de dangerosite, un niveau de confiance, des preuves et une recommandation.
 
-Severites:
+Score et severite:
 
-- score >= 85: `Critical`;
-- score >= 70: `High`;
-- score >= 45: `Medium`;
-- sinon `Low`.
+- Suricata fournit une severite technique brute;
+- SOCket calcule un score SOC avec le contexte de l alerte;
+- le score final determine l affichage `Critical`, `High`, `Medium` ou `Low`.
 
 Precision importante:
 
-> Ce prototype n utilise pas Suricata. Le moteur IDS est interne et base sur des regles applicatives. Suricata ou Wazuh peuvent etre ajoutes comme evolution.
+> En cas de probleme de capture live dans Docker/WSL, le projet fournit un fichier `infra/suricata/sample_eve.json`. Il garde le vrai format EVE JSON de Suricata pour rendre la demonstration fiable.
 
 ## 7. Montrer PostgreSQL
 
@@ -212,4 +211,4 @@ Phrase possible:
 
 Phrase possible:
 
-> SOCket repond au besoin d une plateforme SOC pedagogique: detection, qualification, suivi, stockage SQL, logs NoSQL, hardening, audit, PRA et documentation. Les evolutions naturelles seraient HTTPS, Suricata/Wazuh, Kibana et un RBAC plus granulaire.
+> SOCket repond au besoin d une plateforme SOC pedagogique: detection Suricata, qualification, suivi, stockage SQL, logs NoSQL, hardening, audit, PRA et documentation. Les evolutions naturelles seraient HTTPS, Wazuh, Kibana et un RBAC plus granulaire.

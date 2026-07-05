@@ -107,23 +107,28 @@ Evenements typiques:
 - `incident.updated`: changement de statut, severite ou assignation;
 - `incident.comment`: commentaire d investigation.
 
-## Logs Nginx
+## Alertes Suricata
 
-Les logs du reverse proxy sont montes dans:
+Suricata ecrit ses alertes au format EVE JSON dans:
 
 ```text
-infra/nginx/logs/access.log
-infra/nginx/logs/error.log
+infra/suricata/logs/eve.json
 ```
 
-Ils servent de source au capteur IDS:
+Le script d ingestion lit ce fichier et cree les incidents dans SOCket:
 
 ```bash
-python3 infra/scripts/run_ids_scan.py
+python3 infra/scripts/ingest_suricata_eve.py
+```
+
+Pour une demonstration reproductible:
+
+```bash
+python3 infra/scripts/ingest_suricata_eve.py --sample
 ```
 
 ## Explication pour l oral
 
 Phrase possible:
 
-> PostgreSQL contient le coeur metier de la plateforme SOC: utilisateurs, incidents et chronologie. Elasticsearch joue le role de stockage NoSQL pour les evenements techniques et les traces d audit. Les deux stockages sont consultables depuis la vue Donnees de SOCket. Les logs Nginx alimentent le moteur IDS, qui transforme des requetes suspectes en incidents exploitables par les analystes.
+> PostgreSQL contient le coeur metier de la plateforme SOC: utilisateurs, incidents et chronologie. Elasticsearch joue le role de stockage NoSQL pour les evenements techniques et les traces d audit. Les deux stockages sont consultables depuis la vue Donnees de SOCket. Suricata produit les alertes EVE JSON, puis SOCket les transforme en incidents exploitables par les analystes.

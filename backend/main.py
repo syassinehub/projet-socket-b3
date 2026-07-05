@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 import psycopg2
 from psycopg2.extras import Json, RealDictCursor
 
-from detector import analyze_raw_logs
+from suricata import parse_suricata_eve
 
 
 APP_SECRET_KEY = os.getenv("APP_SECRET_KEY", "dev-change-this-secret")
@@ -29,7 +29,7 @@ security = HTTPBearer(auto_error=False)
 
 app = FastAPI(
     title="SOCket API",
-    description="API back-end pour la plateforme SOC et IDS SOCket",
+    description="API back-end pour la plateforme SOC et ingestion Suricata SOCket",
     version="2.0.0",
 )
 
@@ -63,8 +63,8 @@ class CommentCreate(BaseModel):
     message: str = Field(min_length=2, max_length=1000)
 
 
-class RawLogPayload(BaseModel):
-    raw_logs: str = Field(min_length=1)
+class SuricataEvePayload(BaseModel):
+    raw_events: str = Field(min_length=1)
 
 
 class AlertIngest(BaseModel):
@@ -561,14 +561,6 @@ def add_comment(incident_id: int, payload: CommentCreate, user: dict[str, Any] =
     return {"message": "Commentaire ajoute"}
 
 
-@app.post("/api/v1/detections/analyze")
-@app.post("/v1/detections/analyze")
-def analyze_logs(payload: RawLogPayload, user: dict[str, Any] = Depends(current_user)):
-    detections = analyze_raw_logs(payload.raw_logs)
-    log_security_event("ids.analysis", f"{len(detections)} detection(s) produite(s)", actor=user["username"])
-    return {"detections": detections, "count": len(detections)}
-
-
 @app.post("/api/v1/ingest/alert", status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_sensor)])
 @app.post("/v1/ingest/alert", status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_sensor)])
 def ingest_alert(alert: AlertIngest):
@@ -578,14 +570,14 @@ def ingest_alert(alert: AlertIngest):
         return created
 
 
-@app.post("/api/v1/ingest/nginx-logs", dependencies=[Depends(require_sensor)])
-@app.post("/v1/ingest/nginx-logs", dependencies=[Depends(require_sensor)])
-def ingest_nginx_logs(payload: RawLogPayload):
-    detections = analyze_raw_logs(payload.raw_logs)
+@app.post("/api/v1/ingest/suricata-eve", dependencies=[Depends(require_sensor)])
+@app.post("/v1/ingest/suricata-eve", dependencies=[Depends(require_sensor)])
+def ingest_suricata_eve(payload: SuricataEvePayload):
+    detections = parse_suricata_eve(payload.raw_events)
     created = []
     with get_conn() as conn, conn.cursor() as cur:
         for detection in detections:
-            created.append(create_incident_record(cur, AlertIngest(**detection), "ids-sensor"))
+            created.append(create_incident_record(cur, AlertIngest(**detection), "suricata"))
         conn.commit()
     return {"created": created, "detections": detections, "count": len(created)}
 

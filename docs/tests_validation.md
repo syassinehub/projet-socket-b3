@@ -87,12 +87,13 @@ Resultat attendu:
 
 ```bash
 bash pentest/simulate_attack.sh
+bash pentest/attack_web_vectors.sh
 ```
 
 Resultat attendu:
 
 - des requetes HTTP sont envoyees;
-- le capteur IDS analyse les logs;
+- le script ingere les alertes Suricata EVE JSON;
 - l API renvoie un JSON avec les detections;
 - de nouveaux incidents apparaissent dans le tableau de bord.
 
@@ -156,8 +157,9 @@ sha256sum -c infra/backups/*.sha256
 ## 10. Test syntaxe scripts et backend
 
 ```bash
-python3 -m py_compile backend/main.py backend/detector.py
+python3 -m py_compile backend/main.py backend/suricata.py infra/scripts/ingest_suricata_eve.py
 bash -n pentest/simulate_attack.sh
+bash -n pentest/attack_web_vectors.sh
 bash -n pentest/attack_sqli.sh
 bash -n pentest/attack_bruteforce.sh
 bash -n infra/scripts/backup_pra.sh

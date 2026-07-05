@@ -2,13 +2,14 @@
 
 ## Vue d ensemble
 
-SOCket est compose de cinq services Docker relies par un reseau prive:
+SOCket est compose de cinq services Docker principaux, avec un service Suricata optionnel pour la detection IDS:
 
 - `socket-nginx`: point d entree public sur `http://localhost`.
 - `socket-frontend`: interface Vue.js compilee et servie par Nginx.
 - `socket-backend`: API FastAPI, authentification, workflow incident et ingestion IDS.
 - `socket-postgres`: base SQL pour les utilisateurs, incidents et chronologie.
 - `socket-elasticsearch`: base NoSQL pour les evenements de securite et les logs applicatifs.
+- `socket-suricata`: IDS optionnel produisant des alertes EVE JSON.
 
 ```mermaid
 flowchart LR
@@ -17,7 +18,9 @@ flowchart LR
     Proxy --> Api["API FastAPI\nsocket-backend:8000"]
     Api --> Sql["PostgreSQL\nusers, incidents, events"]
     Api --> Es["Elasticsearch\nsocket-events"]
-    NginxLogs["Logs Nginx\ninfra/nginx/logs/access.log"] --> Sensor["run_ids_scan.py\ncapteur IDS"]
+    Proxy --> Suricata["Suricata IDS\nEVE JSON"]
+    Suricata --> Eve["infra/suricata/logs/eve.json"]
+    Eve --> Sensor["ingest_suricata_eve.py"]
     Sensor --> Api
     Pentest["Scripts pentest\nSQLi, bruteforce, scan"] --> Proxy
 ```
@@ -34,11 +37,11 @@ flowchart LR
 ## Flux detection IDS
 
 1. Les scripts dans `pentest/` envoient des requetes suspectes vers Nginx.
-2. Nginx ecrit les requetes dans `infra/nginx/logs/access.log`.
-3. `infra/scripts/run_ids_scan.py` lit les nouveaux logs.
-4. Le capteur envoie les logs a `/api/v1/ingest/nginx-logs` avec `X-SOCket-Sensor-Token`.
-5. `backend/detector.py` classe les attaques et calcule score, severite, confiance et preuves.
-6. FastAPI cree des incidents dans PostgreSQL.
+2. Suricata inspecte le trafic du reverse proxy et applique les regles IDS locales.
+3. Suricata ecrit ses alertes au format EVE JSON dans `infra/suricata/logs/eve.json`.
+4. `infra/scripts/ingest_suricata_eve.py` lit les alertes EVE et les envoie a `/api/v1/ingest/suricata-eve` avec `X-SOCket-Sensor-Token`.
+5. FastAPI transforme les alertes Suricata en incidents SOCket avec score, severite, confiance et preuves.
+6. FastAPI cree les incidents dans PostgreSQL.
 7. Les evenements de securite sont indexes dans Elasticsearch.
 
 ## Donnees stockees
@@ -68,10 +71,11 @@ Elasticsearch conserve les evenements techniques utiles a l audit:
 - Nginx applique des en-tetes de securite, du rate limiting et bloque les chemins sensibles.
 - L ingestion IDS est protegee par un token capteur separe du token utilisateur.
 - Les donnees SQL et NoSQL sont persistantes via volumes Docker.
+- Suricata peut etre lance avec le profil Docker `suricata` pour separer la detection de l application.
 
 ## Limites assumees du prototype
 
 - HTTPS n est pas active en local.
 - Le RBAC reste volontairement simple: `admin` et `analyst`.
-- Le moteur IDS est interne et base sur des regles applicatives, pas sur Suricata.
+- La capture Suricata live peut dependre des privileges Docker/WSL; un fichier EVE de demonstration est fourni.
 - Elasticsearch est utilise comme brique NoSQL locale, sans tableau Kibana.

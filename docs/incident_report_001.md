@@ -7,7 +7,7 @@
 
 ## Resume executif
 
-Une simulation multi-vecteurs a ete lancee contre le reverse proxy SOCket. Les logs Nginx ont ete collectes puis analyses par le moteur IDS SOCket. Les detections ont produit des incidents classes par type d attaque, score de dangerosite et niveau de confiance.
+Une simulation multi-vecteurs a ete lancee contre le reverse proxy SOCket. Suricata a produit des alertes EVE JSON, puis SOCket les a ingerees pour creer des incidents classes par type d attaque, score de dangerosite et niveau de confiance.
 
 Impact estime:
 
@@ -31,8 +31,8 @@ Exemples de vecteurs analyses:
 
 | Element | Valeur |
 | --- | --- |
-| Source principale | Logs Nginx |
-| Detection | Moteur IDS interne SOCket |
+| Source principale | Alertes Suricata EVE JSON |
+| Detection | Suricata IDS |
 | Donnees metier | PostgreSQL |
 | Journalisation | Elasticsearch |
 | Type d incident | Multi-vecteurs web |
@@ -85,7 +85,7 @@ curl -s http://localhost/api/v1/logs/recent
 
 ## Ameliorations futures
 
-- Brancher Suricata ou Wazuh pour completer le moteur IDS interne.
+- Ajouter Wazuh ou des playbooks SOC pour completer le traitement.
 - Ajouter HTTPS avec certificats.
 - Ajouter une politique de verrouillage de compte apres trop d echecs.
 - Ajouter des playbooks de reponse par type d attaque.

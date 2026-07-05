@@ -10,7 +10,7 @@ SOCket respecte le theme SOC/CSIRT en proposant une plateforme de detection, qua
 | Theme SOC/CSIRT | Dashboard incidents, workflow analyste, chronologie | `frontend/src/App.vue`, `backend/main.py` |
 | Base SQL | PostgreSQL pour utilisateurs, incidents, evenements | `infra/postgres/init.sql`, `docs/bdd_et_logs.md` |
 | Base NoSQL | Elasticsearch pour logs et evenements | `docker-compose.yml`, `docs/bdd_et_logs.md` |
-| Detection d attaque | IDS interne sur logs Nginx | `backend/detector.py`, `infra/scripts/run_ids_scan.py` |
+| Detection d attaque | Suricata IDS avec ingestion EVE JSON | `infra/suricata/`, `infra/scripts/ingest_suricata_eve.py`, `backend/suricata.py` |
 | Audit / pentest | Scripts SQLi, bruteforce et multi-vecteurs | `pentest/` |
 | Hardening | Nginx security headers, rate limiting, blocage chemins sensibles | `infra/nginx/nginx.conf` |
 | GRC / PSSI | Politique securite, risques, mesures | `docs/grc_pssi_risques.md` |
@@ -35,7 +35,7 @@ Pendant la soutenance, suivre `docs/demo_soutenance.md`:
 ## Points forts
 
 - Le projet est coherent avec le theme SOC.
-- Les incidents sont crees automatiquement depuis des logs reels.
+- Les incidents sont crees automatiquement depuis des alertes Suricata EVE JSON.
 - Les alertes sont qualifiees avec score, severite, confiance et preuves.
 - La plateforme combine SQL et NoSQL.
 - Les scripts permettent une demo reproductible.
@@ -44,6 +44,6 @@ Pendant la soutenance, suivre `docs/demo_soutenance.md`:
 ## Reste perfectible
 
 - HTTPS n est pas active dans le prototype local.
-- Le moteur IDS est base sur des regles internes; Suricata/Wazuh peut etre ajoute en extension.
+- La capture Suricata live dans Docker/WSL peut dependre des privileges reseau; un fichier EVE de demonstration securise la soutenance.
 - Le RBAC est volontairement simple pour rester lisible pendant la soutenance.
 - Kibana n est pas integre, les logs Elasticsearch sont consultes par API/curl.

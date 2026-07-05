@@ -27,7 +27,7 @@ Le prototype est volontairement oriente demonstration pedagogique. Il montre les
 - Mise a jour du statut: Nouveau, En cours, Resolu, Clos.
 - Assignation d un incident a un analyste.
 - Commentaires et chronologie d investigation.
-- Conservation de preuves techniques issues des logs Nginx.
+- Conservation de preuves techniques issues des alertes Suricata EVE JSON.
 - Consultation des evenements de securite stockes dans Elasticsearch.
 
 ## 3. Architecture technique
@@ -37,7 +37,7 @@ Le prototype est volontairement oriente demonstration pedagogique. Il montre les
 - SQL: PostgreSQL stocke utilisateurs, roles, incidents et evenements.
 - NoSQL: Elasticsearch stocke les journaux de securite et evenements applicatifs.
 - Reverse proxy: Nginx centralise l exposition publique et applique les en-tetes de securite.
-- IDS: moteur de detection SOCket analysant les logs Nginx avec classification et scoring.
+- IDS: Suricata detecte les attaques et SOCket ingere les alertes EVE JSON avec classification et scoring.
 - DevOps: Docker Compose et GitHub Actions.
 
 Voir le schema complet dans `docs/architecture.md`.
@@ -75,7 +75,7 @@ Elasticsearch stocke les evenements techniques:
 
 ## 6. Detection et classement
 
-Le moteur IDS analyse les logs Nginx et recherche des patterns d attaque. Chaque detection contient:
+Suricata analyse le trafic et produit des alertes au format EVE JSON. SOCket lit ces alertes et les transforme en incidents. Chaque detection contient:
 
 - un type d attaque;
 - une IP source;
@@ -85,24 +85,26 @@ Le moteur IDS analyse les logs Nginx et recherche des patterns d attaque. Chaque
 - une preuve;
 - une recommandation.
 
-Regle de severite:
+Le score n est pas recopie directement depuis Suricata. SOCket part de la severite Suricata, puis ajuste le score avec:
 
-- `Critical`: score >= 85;
-- `High`: score >= 70;
-- `Medium`: score >= 45;
-- `Low`: score inferieur a 45.
+- le type d attaque;
+- le statut HTTP observe;
+- la cible visee;
+- la presence de preuves techniques;
+- le niveau de precision de la signature.
+
+Exemple: une alerte Suricata `severity=1` sert de base critique, mais SOCket peut renforcer ou reduire le score selon le contexte.
 
 ## 7. Limites du prototype
 
 - Pas de HTTPS en local.
-- Pas de Suricata integre.
 - RBAC simple.
 - Elasticsearch sans interface Kibana.
-- Le moteur IDS est pedagogique et base sur des regles internes.
+- La capture live Suricata dans Docker/WSL peut demander des privileges reseau; un fichier EVE de demonstration est fourni.
 
 ## 8. Evolutions possibles
 
-- Ajouter Suricata ou Wazuh.
+- Ajouter Wazuh.
 - Ajouter Kibana.
 - Ajouter HTTPS.
 - Ajouter verrouillage de compte apres echecs repetes.

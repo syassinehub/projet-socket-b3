@@ -14,6 +14,8 @@ frontend/dist/
 
 # Logs and generated artifacts
 infra/nginx/logs/
+infra/suricata/logs/
+*.offset
 *.log
 infra/backups/
 
@@ -21,4 +23,3 @@ infra/backups/
 .DS_Store
 .idea/
 .vscode/
-!frontend/.vscode/extensions.json

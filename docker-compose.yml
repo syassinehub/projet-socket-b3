@@ -73,6 +73,31 @@ services:
     networks:
       - socket_network
 
+  ids-suricata:
+    image: jasonish/suricata:latest
+    container_name: socket-suricata
+    restart: unless-stopped
+    profiles:
+      - suricata
+    network_mode: "service:proxy"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command:
+      - -i
+      - eth0
+      - -l
+      - /var/log/suricata
+      - -S
+      - /var/lib/suricata/rules/local.rules
+      - -k
+      - none
+    volumes:
+      - ./infra/suricata/logs:/var/log/suricata
+      - ./infra/suricata/rules:/var/lib/suricata/rules:ro
+    depends_on:
+      - proxy
+
 networks:
   socket_network:
     driver: bridge
