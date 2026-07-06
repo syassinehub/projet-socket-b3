@@ -111,8 +111,6 @@ La documentation finale se trouve dans `docs/`. Elle couvre les livrables demand
 | `docs/grc_pssi_risques.md` | PSSI, risques, mesures de securite |
 | `docs/pra_pca.md` | Sauvegarde, restauration et continuite |
 | `docs/incident_report_001.md` | Exemple de rapport d incident |
-| `docs/tests_validation.md` | Tests, validation et captures a preparer |
-| `docs/demo_soutenance.md` | Scenario complet pour la presentation orale |
 
 ## Commandes utiles
 
